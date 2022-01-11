@@ -144,34 +144,6 @@ function Home() {
   );
 }
 
-/*function Home() {
-  const myForm = document.getElementById('myForm');
-  myForm.addEventListener('submit', function (e){
-    e.preventDefault();
-    const formData = new FormData(this);
-    <form class="form" id="myForm">
-        <input type="text" name="city"/>
-        <button onClick="submit">Submit</button>
-      </form>
-    fetch('http://localhost:8080/CA2/api/weather',{
-      method: 'POST',
-      body: 'formData'
-    }).then(function(response){
-      return response.text();
-    }).then(function (text) {
-      console.log(text);
-    }).catch(function (error) {
-      console.log(error)
-    })
-  })
-  return (
-    <div className="col-md-12 text-center">
-      <h2>Weather Information Central Service System (WICSS)</h2>
-      
-    </div>
-  );
-}*/
-
 function Login() {
   return (
     <form action="{URL}">
@@ -183,10 +155,32 @@ function Login() {
 }
 
 function Dashboard() {
+  const [local, setWeatherData] = useState(null)
+
+  const startGame = async (evt) => {
+    evt.preventDefault();
+
+    const response = await fetch(`${URL}`, 
+      facade.makeOptions("GET",false)
+    );
+  }
+
+  if (startGame !== null) {
+    return (
+      <div>
+        <div>Owner: {local.owner.name}</div>
+      </div>
+    )
+  }
   return (
     <div>
-      <h2>Dashboard</h2>
+     <form>
+     <button className="btn-primary" onClick={(event) => {
+            startGame(event)
+          }}>
+     </button>
+     </form>
     </div>
   );
-}
-
+        
+      }

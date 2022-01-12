@@ -1,80 +1,64 @@
-import './App.css';
-import Button from 'react-bootstrap/Button';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import "./style2.css"
+import "./App.css";
+import Button from "react-bootstrap/Button";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./style2.css";
 
-import LoggedIn from './LoggedIn';
-import LogIn from './Login';
-import facade from './ApiFacade';
+import LoggedIn from "./LoggedIn";
+import LogIn from "./Login";
+import facade from "./ApiFacade";
+import Table from "react-bootstrap/Table";
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  NavLink
+  NavLink,
 } from "react-router-dom";
-import { URL, WEATHER_URL } from './settings';
+import { URL } from "./settings";
 
 function LoginPrompt() {
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false);
   const logout = () => {
-    facade.logout()
-    setLoggedIn(false)
-  }
+    facade.logout();
+    setLoggedIn(false);
+  };
 
   const login = (user, pass) => {
-    facade.login(user, pass)
-    .then(res => res.json())
-    .then(res => setLoggedIn(true));
+    facade.login(user, pass).then((res) => setLoggedIn(true));
+  };
+
+  if (loggedIn) {
+    return (
+      <div>
+        <LoggedIn facade={facade} />
+        <button onClick={logout}>Logout</button>
+      </div>
+    );
   }
 
-  const weatherData =(city) => {
-    facade.weatherData(city)
-    
-  }
-
-  return (
-    <div>
-      {!loggedIn ? (<LogIn login={login} />) :
-        (<div>
-          <LoggedIn facade={facade} />
-          <button onClick={logout}>Logout</button>
-        </div>)}
-    </div>
-  )
+  return <LogIn login={login} />;
 }
 
 export default function BasicExample() {
   return (
     <Router>
       <div>
-        <Header/>
+        <Header facade={facade} />
+
         <hr />
-       
-        {
-          /*
-          A <Switch> looks through all its children <Route>
-          elements and renders the first one whose path
-          matches the current URL. Use a <Switch> any time
-          you have multiple routes, but you want only one
-          of them to render at a time
-          */
-        }
+
         <div className="content">
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/whatisthiseven">
-            <Dashboard />
-          </Route>
-        </Switch>
-      </div>
+          <Switch>
+            <Route path="/login">
+              <Login facade={facade} />
+            </Route>
+            <Route path="/whatisthiseven">
+              <Dashboard facade={facade} />
+            </Route>
+          </Switch>
+        </div>
       </div>
     </Router>
   );
@@ -83,63 +67,75 @@ export default function BasicExample() {
 // You can think of these components as "pages"
 // in your app.
 
-
-function Header(){
-  return(
-    <div>
-      <ul className="header">
-          <li>
-          <NavLink exact activeClassName="selected" to="/">Weather</NavLink>
-          </li>
-          <li>
-            <NavLink exact activeClassName="selected" to="/login">Login</NavLink>
-          </li>
-          <li>
-            <NavLink exact activeClassName="selected" to="/whatisthiseven">Dashboard</NavLink>
-          </li>
-        </ul>
-    </div>
+function Header() {
+  const [isLoggedIn, setLoggedIn] = useState(!!facade.getToken());
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [roles, setRoles] = useState(
+    isLoggedIn ? facade.getUserRoles().split(",") : []
   );
-}
 
+  const login = (event) => {
+    event.preventDefault();
 
+    facade.login(username, password).then(() => {
+      setLoggedIn(true);
+      setRoles(facade.getUserRoles().split(","));
+    });
+  };
 
-function Home() {
-  const [city, setCity] = useState('')
-  const [weatherData, setWeatherData] = useState(null)
+  const logout = () => {
+    facade.logout();
+    setLoggedIn(false);
+    setRoles([]);
+  };
 
-  const fetchWeather = async (event) => {
-    event.preventDefault()
-
-    const response = await fetch(`${WEATHER_URL}?city=${city}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-
-    const data = await response.json()
-    setWeatherData(data)
-  }
-
-  if (weatherData !== null) {
+  if (isLoggedIn) {
     return (
       <div>
-        <div>City: { weatherData.weather.city }</div>
-        <div>Official Name: { weatherData.country.officialName }</div>
-        <div>Population: { weatherData.country.population }</div>
-        <div>Temperature: { weatherData.weather.temperature }</div>
+        <ul className="header">
+          {facade.hasUserAccess("admin") && (
+            <li>
+              <NavLink exact activeClassName="selected" to="/whatisthiseven">
+                Dashboard
+              </NavLink>
+            </li>
+          )}
+
+          <li>
+            <NavLink
+              exact
+              activeClassName="selected"
+              to="/logout"
+              onClick={logout}
+            >
+              Logout
+            </NavLink>
+          </li>
+        </ul>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="col-md-12 text-center">
-      <h2>Weather Information Central Service System (WICSS)</h2>
-      <form action={WEATHER_URL} method="POST">
-        <input type="text" name="city" value={city} onChange={e => setCity(e.target.value)} />
-        <button onClick={fetchWeather}>Submit</button>
-      </form>
+    <div>
+      <ul className="header">
+        <form>
+          <input
+            placeholder="User Name"
+            id="username"
+            onChange={(event) => setUsername(event.target.value)}
+          />
+          <input
+            placeholder="Password"
+            id="password"
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <button type="button" onClick={login} class="btn btn-primary">
+            Login
+          </button>
+        </form>
+      </ul>
     </div>
   );
 }
@@ -147,40 +143,61 @@ function Home() {
 function Login() {
   return (
     <form action="{URL}">
-    <div class="form-group w-25">
-      <LoginPrompt/>
-    </div>
-  </form>
+      <div class="form-group w-25">
+        <LoginPrompt />
+      </div>
+    </form>
+  );
+}
+
+function OwnersComponent() {
+  const [owners, setOwners] = useState([]);
+
+  useEffect(() => {
+    fetch(URL + "api/owner/show")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setOwners(data);
+      });
+  }, []);
+
+  return (
+    <>
+      {owners.length > 0 ? (
+        <>
+          <div>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <td>ID</td>
+                  <td>Name</td>
+                  <td>Address</td>
+                  <td>Phone</td>
+                </tr>
+              </thead>
+              <tbody>
+                {owners.map((x) => {
+                  return (
+                    <tr key={x.id}>
+                      <td>{x.id}</td>
+                      <td>{x.name}</td>
+                      <td>{x.address}</td>
+                      <td>{x.phone}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </>
+      ) : (
+        <h2>Failed fetching data</h2>
+      )}
+    </>
   );
 }
 
 function Dashboard() {
-  const [local, setWeatherData] = useState(null)
-
-  const startGame = async (evt) => {
-    evt.preventDefault();
-
-    const response = await fetch(`${URL}`, 
-      facade.makeOptions("GET",false)
-    );
-  }
-
-  if (startGame !== null) {
-    return (
-      <div>
-        <div>Owner: {local.owner.name}</div>
-      </div>
-    )
-  }
-  return (
-    <div>
-     <form>
-     <button className="btn-primary" onClick={(event) => {
-            startGame(event)
-          }}>
-     </button>
-     </form>
-    </div>
-  );
-        
-      }
+  return OwnersComponent();
+}

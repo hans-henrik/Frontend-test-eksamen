@@ -1,26 +1,36 @@
 ul.header {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #333;
-  }
-  
-  ul.header li {
-    float: left;
-  }
-  
-  ul.header li a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-  }
-  ul.header li a:hover:not(.active) {
-    background-color: #111;
-  }
-  
-  .selected {
-    background-color: #4caf50;
-  }
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+ul.header li {
+  float: left;
+}
+
+ul.header li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+ul.header li a:hover:not(.active) {
+  background-color: #111;
+}
+
+ul.header input {
+  margin: 4px 16px;
+  padding: 5px 12px;
+}
+
+ul.header button {
+  margin-top: -4px;
+  margin-left: 4px;
+}
+
+.selected {
+  background-color: #4caf50;
+}

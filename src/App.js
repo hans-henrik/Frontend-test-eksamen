@@ -32,7 +32,7 @@ function LoginPrompt() {
   if (loggedIn) {
     return (
       <div>
-        <LoggedIn facade={facade} />
+        <LoggedIn />
         <button onClick={logout}>Logout</button>
       </div>
     );
@@ -45,17 +45,26 @@ export default function BasicExample() {
   return (
     <Router>
       <div>
-        <Header facade={facade} />
+        <Header />
 
         <hr />
 
         <div className="content">
           <Switch>
             <Route path="/login">
-              <Login facade={facade} />
+              <Login />
             </Route>
-            <Route path="/whatisthiseven">
-              <Dashboard facade={facade} />
+            <Route path="/auctions">
+              <Dashboard />
+            </Route>
+            <Route path="/boats">
+              <Boats />
+            </Route>
+            <Route path="/edit">
+              <Edit />
+            </Route>
+            <Route path="/create">
+              <Create />
             </Route>
           </Switch>
         </div>
@@ -94,10 +103,31 @@ function Header() {
     return (
       <div>
         <ul className="header">
-          {facade.hasUserAccess("admin") && (
+          {facade.hasUserAccess("user") && (
             <li>
-              <NavLink exact activeClassName="selected" to="/whatisthiseven">
-                Dashboard
+              <NavLink exact activeClassName="selected" to="/auctions">
+                Auctions
+              </NavLink>
+            </li>
+          )}
+          {facade.hasUserAccess("user") && (
+            <li>
+              <NavLink exact activeClassName="selected" to="/boats">
+                Boats
+              </NavLink>
+            </li>
+          )}
+          {facade.hasUserAccess("user") && (
+            <li>
+              <NavLink exact activeClassName="selected" to="/create">
+                Create Boat
+              </NavLink>
+            </li>
+          )}
+          {facade.hasUserAccess("user") && (
+            <li>
+              <NavLink exact activeClassName="selected" to="/edit">
+                Edit Boat
               </NavLink>
             </li>
           )}
@@ -150,40 +180,42 @@ function Login() {
   );
 }
 
-function OwnersComponent() {
-  const [owners, setOwners] = useState([]);
+function Dashboard() {
+  const [auctions, setAuctions] = useState([]);
 
   useEffect(() => {
-    fetch(URL + "api/owner/show")
+    fetch(URL + "api/auction/show")
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        setOwners(data);
+        setAuctions(data);
       });
   }, []);
 
   return (
     <>
-      {owners.length > 0 ? (
+      {auctions.length > 0 ? (
         <>
           <div>
             <Table striped bordered hover>
               <thead>
                 <tr>
                   <td>ID</td>
-                  <td>Name</td>
-                  <td>Address</td>
-                  <td>Phone</td>
+                  <td>DATE</td>
+                  <td>LOCATION</td>
+                  <td>TIME</td>
+                  <td>NAME</td>
                 </tr>
               </thead>
               <tbody>
-                {owners.map((x) => {
+                {auctions.map((x) => {
                   return (
                     <tr key={x.id}>
                       <td>{x.id}</td>
+                      <td>{x.date}</td>
+                      <td>{x.location}</td>
+                      <td>{x.time}</td>
                       <td>{x.name}</td>
-                      <td>{x.address}</td>
-                      <td>{x.phone}</td>
                     </tr>
                   );
                 })}
@@ -198,6 +230,238 @@ function OwnersComponent() {
   );
 }
 
-function Dashboard() {
-  return OwnersComponent();
+function Boats() {
+  const [boats, setBoats] = useState([]);
+
+  useEffect(() => {
+    fetch(URL + "api/boat/show/3")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setBoats(data);
+      });
+  }, []);
+
+  return (
+    <>
+      {boats.length > 0 ? (
+        <>
+          <div>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <td>ID</td>
+                  <td>OWNER_ID</td>
+                  <td>NAME</td>
+                  <td>BRAND</td>
+                  <td>MAKE</td>
+                  <td>YEAR</td>
+                  <td>IMAGE</td>
+                </tr>
+              </thead>
+              <tbody>
+                {boats.map((x) => {
+                  return (
+                    <tr key={x.id}>
+                      <td>{x.id}</td>
+                      <td>{x.ownerId}</td>
+                      <td>{x.name}</td>
+                      <td>{x.brand}</td>
+                      <td>{x.make}</td>
+                      <td>{x.year}</td>
+                      <td>{x.img}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </>
+      ) : (
+        <h2>Failed fetching data</h2>
+      )}
+    </>
+  );
+}
+
+function Auctions() {
+  const [auctions, setAuctions] = useState([]);
+
+  useEffect(() => {
+    fetch(URL + "api/boat/show/" + facade.getToken())
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setAuctions(data);
+      });
+  }, []);
+
+  return (
+    <>
+      {auctions.length > 0 ? (
+        <>
+          <div>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <td>BRAND</td>
+                  <td>IMG</td>
+                  <td>MAKE</td>
+                  <td>NAME</td>
+                  <td>YEAR</td>
+                  <td>OWNER_ID</td>
+                </tr>
+              </thead>
+              <tbody>
+                {auctions.map((x) => {
+                  return (
+                    <tr key={x.id}>
+                      <td>{x.brand}</td>
+                      <td>{x.img}</td>
+                      <td>{x.make}</td>
+                      <td>{x.name}</td>
+                      <td>{x.year}</td>
+                      <td>{x.ownerId}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </>
+      ) : (
+        <h2>Failed fetching data</h2>
+      )}
+    </>
+  );
+}
+
+function Create() {
+  const [message, setMessage] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+
+    const data = new FormData(event.target)
+    const obj = Object.fromEntries(data.entries())
+
+    fetch(URL + "api/boat/create/3", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(obj)
+    }).then((response) => {
+      if (response.status !== 200) {
+        setMessage(response.status + ': ' + response.statusText)
+        return
+      }
+      setMessage('Boat created')
+    }).catch(() => {
+      setMessage('Error')
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p>{ message }</p>
+      
+      <label for="name">Name:</label>
+      <br />
+      <input type="text" id="name" name="name" />
+      <br />
+
+      <label for="brand">Brand:</label>
+      <br />
+      <input type="text" id="brand" name="brand" />
+      <br />
+
+      <label for="make">Make:</label>
+      <br />
+      <input type="text" id="make" name="make" />
+      <br />
+
+      <label for="year">Year:</label>
+      <br />
+      <input type="number" id="year" name="year" />
+      <br />
+
+      <label for="img">Image:</label>
+      <br />
+      <input type="text" id="img" name="img" />
+      <br />
+
+      <button className="btn btn-primary" type="submit">Submit</button>
+    </form>
+  );
+}
+
+function Edit() {
+  const [message, setMessage] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+
+    const data = new FormData(event.target)
+    const obj = Object.fromEntries(data.entries())
+
+    fetch(URL + "api/boat/update", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(obj)
+    }).then((response) => {
+      if (response.status !== 200) {
+        setMessage(response.status + ': ' + response.statusText)
+        return
+      }
+      setMessage('Boat updated')
+    }).catch(() => {
+      setMessage('Error')
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p>{ message }</p>
+
+      <label for="id">ID:</label>
+      <br />
+      <input type="number" id="id" name="id" />
+      <br />
+
+      <label for="ownerId">Owner ID:</label>
+      <br />
+      <input type="number" id="ownerId" name="ownerId" />
+      <br />
+      
+      <label for="name">Name:</label>
+      <br />
+      <input type="text" id="name" name="name" />
+      <br />
+
+      <label for="brand">Brand:</label>
+      <br />
+      <input type="text" id="brand" name="brand" />
+      <br />
+
+      <label for="make">Make:</label>
+      <br />
+      <input type="text" id="make" name="make" />
+      <br />
+
+      <label for="year">Year:</label>
+      <br />
+      <input type="number" id="year" name="year" />
+      <br />
+
+      <label for="img">Image:</label>
+      <br />
+      <input type="text" id="img" name="img" />
+      <br />
+
+      <button className="btn btn-primary" type="submit">Submit</button>
+    </form>
+  );
 }

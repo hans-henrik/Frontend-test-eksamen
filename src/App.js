@@ -234,7 +234,7 @@ function Boats() {
   const [boats, setBoats] = useState([]);
 
   useEffect(() => {
-    fetch(URL + "api/boat/show/3")
+    fetch(URL + "api/boat/show/1")
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
@@ -284,58 +284,6 @@ function Boats() {
   );
 }
 
-function Auctions() {
-  const [auctions, setAuctions] = useState([]);
-
-  useEffect(() => {
-    fetch(URL + "api/boat/show/" + facade.getToken())
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setAuctions(data);
-      });
-  }, []);
-
-  return (
-    <>
-      {auctions.length > 0 ? (
-        <>
-          <div>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <td>BRAND</td>
-                  <td>IMG</td>
-                  <td>MAKE</td>
-                  <td>NAME</td>
-                  <td>YEAR</td>
-                  <td>OWNER_ID</td>
-                </tr>
-              </thead>
-              <tbody>
-                {auctions.map((x) => {
-                  return (
-                    <tr key={x.id}>
-                      <td>{x.brand}</td>
-                      <td>{x.img}</td>
-                      <td>{x.make}</td>
-                      <td>{x.name}</td>
-                      <td>{x.year}</td>
-                      <td>{x.ownerId}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </div>
-        </>
-      ) : (
-        <h2>Failed fetching data</h2>
-      )}
-    </>
-  );
-}
-
 function Create() {
   const [message, setMessage] = useState('')
 
@@ -345,7 +293,7 @@ function Create() {
     const data = new FormData(event.target)
     const obj = Object.fromEntries(data.entries())
 
-    fetch(URL + "api/boat/create/3", {
+    fetch(URL + "api/boat/create/1", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
